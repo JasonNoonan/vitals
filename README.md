@@ -51,8 +51,7 @@ defmodule MyApp.Vitals.Handler do
 
   @impl Vitals.Handler
   def init(_opts) do
-    diagnostic = %Diagnostic{timer: {5, :second}}
-    {:ok, diagnostic}
+    %Diagnostic{timer: {5, :second}}
   end
 
   def handle_info(:check, _from, state) do

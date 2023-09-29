@@ -18,9 +18,11 @@ defmodule Vitals.Supervisor do
   end
 
   def init(opts) do
+    handlers = opts[:handlers]
+
     children = [
-      Vitals.DiagnosticTable,
-      {Vitals.HandlerSupervisor, opts[:handlers]}
+      {Vitals.DiagnosticTable, handlers},
+      {Vitals.HandlerSupervisor, handlers}
     ]
 
     Supervisor.init(children, strategy: :one_for_all)

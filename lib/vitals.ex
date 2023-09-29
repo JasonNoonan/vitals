@@ -1,18 +1,4 @@
 defmodule Vitals do
-  @moduledoc """
-  Documentation for `Vitals`.
-  """
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Vitals.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
+  @spec check_diagnostics(Vitals.Formatter.format()) :: String.t()
+  defdelegate check_diagnostics(format), to: Vitals.DiagnosticTable
 end
