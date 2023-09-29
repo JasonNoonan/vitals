@@ -18,10 +18,10 @@
 
 ```elixir
 # getting diagnostics in router
-Vitals.check_diagnostics(:http) # :http | :exit | :io | :io_pretty
+Vitals.check_diagnostics(:http) # :http | :exit | :io | :pretty
 
 # getting diagnostics in iex
-Vitals.check_diagnostics(:io_pretty) # :http | :exit | :io | :io_pretty
+Vitals.check_diagnostics(:pretty) # :http | :exit | :io | :pretty
 ```
 
 
@@ -45,17 +45,12 @@ defmodule MyApp.Vitals.Handler do
 
   @impl Vitals.Handler
   def check(las_diagnostic) do
-    # how you do the check
     %Diagnostic{}
   end
 
   @impl Vitals.Handler
   def init(_opts) do
-    %Diagnostic{timer: {5, :second}}
-  end
-
-  def handle_info(:check, _from, state) do
-    {:noreply, check(state)}
+    %Diagnostic{timer: %{every: {5, :second}}}
   end
 end
 ```
