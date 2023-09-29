@@ -1,8 +1,9 @@
 defmodule Vitals.DummyHandler do
+  @behaviour Vitals.Handler
   alias Vitals.Diagnostic
 
   def check(last_diagnostic) do
-    IO.inspect("Yo bud")
+    dbg()
     last_diagnostic
   end
 
