@@ -17,10 +17,10 @@ defmodule Vitals.Supervisor do
     Supervisor.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  def init(_opts) do
+  def init(opts) do
     children = [
-      Vitals.DiagnosticTable
-      # handlers supervisor
+      Vitals.DiagnosticTable,
+      {Vitals.HandlerSupervisor, opts[:handlers]}
     ]
 
     Supervisor.init(children, strategy: :one_for_all)
