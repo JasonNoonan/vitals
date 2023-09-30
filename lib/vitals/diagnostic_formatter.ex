@@ -30,4 +30,12 @@ defmodule Vitals.DiagnosticFormatter do
   def format(%State{status: _non_healthy}, :exit_code) do
     127
   end
+
+  def format(%State{status: :healthy}, :http) do
+    200
+  end
+
+  def format(%State{status: _non_healthy}, :http) do
+    503
+  end
 end
