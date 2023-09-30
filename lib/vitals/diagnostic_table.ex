@@ -1,7 +1,6 @@
 defmodule Vitals.DiagnosticTable do
   alias Vitals.Diagnostic
   alias Vitals.DiagnosticFormatter
-  alias Vitals.Telemetry
 
   defmodule State do
     @moduledoc """
@@ -33,7 +32,6 @@ defmodule Vitals.DiagnosticTable do
   Add `diagnostic` result for `handler` to DiagnosticTable.
   """
   def add_diagnostic(handler, diagnostic) do
-    Telemetry.diagnostic_received(handler, diagnostic)
     :ets.insert(@table, {handler, diagnostic})
   end
 
@@ -71,8 +69,12 @@ defmodule Vitals.DiagnosticTable do
 
     # initialize all handlers against table
     # TODO: handle {handler, opts} form
-    Enum.each(handlers, fn handler ->
-      :ets.insert(@table, {handler, nil})
+    Enum.each(handlers, fn 
+      {_handler, opts} ->
+        :ets.insert(@table, {opts[:id], nil})
+
+      handler ->
+        :ets.insert(@table, {handler, nil})
     end)
 
     {:ok, nil}

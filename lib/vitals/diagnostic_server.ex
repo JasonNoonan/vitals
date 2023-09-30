@@ -6,31 +6,45 @@ defmodule Vitals.DiagnosticServer do
   use GenServer
   alias Vitals.Diagnostic
 
-  def start_link(handler) do
-    GenServer.start_link(__MODULE__, handler)
+  def start_link(opts) do
+    GenServer.start_link(__MODULE__, opts)
+  end
+
+  def child_spec(args) do
+    id = Keyword.get(args, :id, __MODULE__)
+
+    default = %{
+      id: id,
+      start: {__MODULE__, :start_link, [args]}
+    }
+
+    Supervisor.child_spec(default, [])
   end
 
   @impl GenServer
-  def init(handler) do
+  def init(opts) do
+    handler = opts[:handler]
+    id = Keyword.get(opts, :id, handler)
+
     diagnostic =
       :telemetry.span(
         [:vitals, :diagnostic],
         %{},
         fn ->
           diagnostic =
-            handler.init([])
+            handler.init(opts)
             |> report_diagnostic(handler)
             |> maybe_schedule_follow_up()
 
-          {diagnostic, %{handler: handler, diagnostic: diagnostic}}
+          {diagnostic, %{handler: id, diagnostic: diagnostic}}
         end
       )
 
-    {:ok, %{handler: handler, last_diagnostic: diagnostic}}
+    {:ok, %{handler: handler, id: id, last_diagnostic: diagnostic}}
   end
 
   @impl GenServer
-  def handle_info(:check, %{handler: handler, last_diagnostic: last_diagnostic} = state) do
+  def handle_info(:check, %{handler: handler, id: id, last_diagnostic: last_diagnostic} = state) do
     new_diagnostic =
       :telemetry.span(
         [:vitals, :diagnostic],
@@ -39,7 +53,7 @@ defmodule Vitals.DiagnosticServer do
           diagnostic =
             last_diagnostic
             |> handler.check()
-            |> report_diagnostic(handler)
+            |> report_diagnostic(id)
             |> maybe_schedule_follow_up()
 
           {diagnostic, %{handler: handler, diagnostic: diagnostic}}
@@ -53,8 +67,8 @@ defmodule Vitals.DiagnosticServer do
   # HELPERS
   #################################################
 
-  defp report_diagnostic(diagnostic, handler) do
-    Vitals.DiagnosticTable.add_diagnostic(handler, diagnostic)
+  defp report_diagnostic(diagnostic, handler_id) do
+    Vitals.DiagnosticTable.add_diagnostic(handler_id, diagnostic)
     diagnostic
   end
 

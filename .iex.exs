@@ -4,19 +4,20 @@ defmodule TelemetryHandler do
   end
 end
 
-:telemetry.attach_many(
-  "vitals_handler",
-  [
-    [:vitals, :diagnostic, :start],
-    [:vitals, :diagnostic, :stop]
-  ],
-  &TelemetryHandler.handle_event/4,
-  nil
-)
+# :telemetry.attach_many(
+#   "vitals_handler",
+#   [
+#     [:vitals, :diagnostic, :start],
+#     [:vitals, :diagnostic, :stop]
+#   ],
+#   &TelemetryHandler.handle_event/4,
+#   nil
+# )
 
 {:ok, _pid} =
   Vitals.Supervisor.start_link(
     handlers: [
-      Vitals.DummyHandler
+      {Vitals.DummyHandler, id: "handler1"},
+      {Vitals.DummyHandler, id: "handler2"}
     ]
   )

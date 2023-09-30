@@ -2,6 +2,8 @@ defmodule Vitals.DiagnosticFormatter do
   @moduledoc """
   Formatter for `Vitals.DiagnosticTable.State`.
   """
+  
+  alias Vitals.DiagnosticFormatter
   alias Vitals.DiagnosticTable.State
 
   @typedoc """
@@ -14,13 +16,12 @@ defmodule Vitals.DiagnosticFormatter do
   """
   @type format :: :io | :pretty | :http | :exit_code
 
-  def format(%State{diagnostics: diagnostics}, :io) do
-    diagnostics
-    |> Enum.map_join("\n", fn {handler, diagnostic} ->
-      "#{handler}: #{diagnostic.status}"
-    end)
-    |> then(fn handler_status -> handler_status <> "\n" end)
-    |> IO.write()
+  def format(%State{} = state, :io) do
+    DiagnosticFormatter.IO.format(state, :io)
+  end
+
+  def format(%State{} = state, :pretty) do
+    DiagnosticFormatter.IO.format(state, :pretty)
   end
 
   def format(%State{status: :healthy}, :exit_code) do

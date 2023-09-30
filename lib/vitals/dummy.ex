@@ -3,10 +3,18 @@ defmodule Vitals.DummyHandler do
   alias Vitals.Diagnostic
 
   def check(last_diagnostic) do
-    last_diagnostic
+    %Diagnostic{last_diagnostic | timer: nil}
   end
 
-  def init(_opts) do
-    Diagnostic.new(status: :healthy, timer: %{every: {5, :second}})
+  def init(opts) do
+    dbg(opts[:id])
+
+    status = if opts[:id] == "handler1" do
+      :degraded
+    else
+      :healthy
+    end
+
+    Diagnostic.new(status: status, timer: %{every: {5, :second}})
   end
 end
