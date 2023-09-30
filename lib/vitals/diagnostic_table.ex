@@ -47,13 +47,13 @@ defmodule Vitals.DiagnosticTable do
           {:halt, :fatal}
 
         {_handler_name, nil}, _accum ->
-          {:halt, :init}
+          {:cont, :init}
 
         {_handler_name, %Diagnostic{status: :degraded}}, _accum ->
           {:halt, :degraded}
 
-        {_handler_name, %Diagnostic{status: :healthy}}, _accum ->
-          {:cont, :healthy}
+        {_handler_name, _diagnostic}, accum ->
+          {:cont, accum}
       end)
 
     %State{

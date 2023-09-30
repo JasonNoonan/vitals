@@ -3,20 +3,20 @@ defmodule Vitals.Diagnostic do
   `Diagnostic`s represent the result of `Handler` running a checkup on a
   dependency.
 
-  `Diagnostic`'s contain a `status` of the last run, a optional `timer` for
+  `Diagnostic`s contain a `status` of the last run, a optional `timer` for
   when an additional check should be performed, as well as `assigns` to store
   any user state needed for the `Handler` to perform its checks.
 
   ## Status
 
-  Status' are used to define the health of the entity being monitored. Use
+  Status is used to define the health of the entity being monitored. Use
   `:fatal` to signify that something is unhealthy and will not be able to
   recover. Such as having invalid credetials or configuration. Otherwise a
   `Diagnostic` should be returned with `:healthy` or `:degraded`.
   """
 
   @typedoc """
-  The status of a Diagnostic check
+  The status of a Diagnostic check.
 
   `:fatal` is considered terminal and a diagnostic will not be ran again when
   it is in this state. `:degraded` is used to represent an unhealthy state
@@ -31,7 +31,7 @@ defmodule Vitals.Diagnostic do
   to schedule the next check.
   """
   @type timer_spec :: %{
-          every: {non_neg_integer(), :second}
+    every: {non_neg_integer(), :second | :millisecond}
         }
 
   @type t :: %__MODULE__{
@@ -83,6 +83,10 @@ defmodule Vitals.Diagnostic do
   """
   def next_run(%__MODULE__{timer: %{every: {unit, :second}}}) do
     :timer.seconds(unit)
+  end
+
+  def next_run(%__MODULE__{timer: %{every: {unit, :millisecond}}}) do
+    unit
   end
 
   def next_run(%__MODULE__{timer: nil}), do: nil

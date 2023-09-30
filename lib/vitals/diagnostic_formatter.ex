@@ -16,11 +16,11 @@ defmodule Vitals.DiagnosticFormatter do
 
   def format(%State{diagnostics: diagnostics}, :io) do
     diagnostics
-    |> Enum.map(fn {handler, diagnostic} ->
+    |> Enum.map_join("\n", fn {handler, diagnostic} ->
       "#{handler}: #{diagnostic.status}"
     end)
-    |> Enum.join("\n")
-    |> IO.inspect()
+    |> then(fn handler_status -> handler_status <> "\n" end)
+    |> IO.write()
   end
 
   def format(%State{status: :healthy}, :exit_code) do
