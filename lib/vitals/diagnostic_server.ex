@@ -13,9 +13,18 @@ defmodule Vitals.DiagnosticServer do
   @impl GenServer
   def init(handler) do
     diagnostic =
-      handler.init([])
-      |> report_diagnostic(handler)
-      |> maybe_schedule_follow_up()
+      :telemetry.span(
+        [:vitals, :diagnostic],
+        %{},
+        fn ->
+          diagnostic =
+            handler.init([])
+            |> report_diagnostic(handler)
+            |> maybe_schedule_follow_up()
+
+          {diagnostic, %{handler: handler, diagnostic: diagnostic}}
+        end
+      )
 
     {:ok, %{handler: handler, last_diagnostic: diagnostic}}
   end
@@ -23,10 +32,19 @@ defmodule Vitals.DiagnosticServer do
   @impl GenServer
   def handle_info(:check, %{handler: handler, last_diagnostic: last_diagnostic} = state) do
     new_diagnostic =
-      last_diagnostic
-      |> handler.check()
-      |> report_diagnostic(handler)
-      |> maybe_schedule_follow_up()
+      :telemetry.span(
+        [:vitals, :diagnostic],
+        %{},
+        fn ->
+          diagnostic =
+            last_diagnostic
+            |> handler.check()
+            |> report_diagnostic(handler)
+            |> maybe_schedule_follow_up()
+
+          {diagnostic, %{handler: handler, diagnostic: diagnostic}}
+        end
+      )
 
     {:noreply, %{state | last_diagnostic: new_diagnostic}}
   end

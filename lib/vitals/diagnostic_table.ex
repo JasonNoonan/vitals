@@ -1,6 +1,7 @@
 defmodule Vitals.DiagnosticTable do
   alias Vitals.Diagnostic
   alias Vitals.DiagnosticFormatter
+  alias Vitals.Telemetry
 
   defmodule State do
     @moduledoc """
@@ -32,6 +33,7 @@ defmodule Vitals.DiagnosticTable do
   Add `diagnostic` result for `handler` to DiagnosticTable.
   """
   def add_diagnostic(handler, diagnostic) do
+    Telemetry.diagnostic_received(handler, diagnostic)
     :ets.insert(@table, {handler, diagnostic})
   end
 

@@ -3,7 +3,6 @@ defmodule Vitals.DummyHandler do
   alias Vitals.Diagnostic
 
   def check(last_diagnostic) do
-    dbg()
     last_diagnostic
   end
 

@@ -10,8 +10,6 @@ defmodule Vitals.HandlerSupervisor do
   end
 
   def init(handlers) do
-    dbg()
-
     handlers
     |> Enum.map(fn h ->
       {Vitals.DiagnosticServer, h}
