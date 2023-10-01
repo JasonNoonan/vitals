@@ -4,15 +4,15 @@ defmodule TelemetryHandler do
   end
 end
 
-:telemetry.attach_many(
-  "vitals_handler",
-  [
-    [:vitals, :diagnostic, :start],
-    [:vitals, :diagnostic, :stop]
-  ],
-  &TelemetryHandler.handle_event/4,
-  nil
-)
+# :telemetry.attach_many(
+#   "vitals_handler",
+#   [
+#     [:vitals, :diagnostic, :start],
+#     [:vitals, :diagnostic, :stop]
+#   ],
+#   &TelemetryHandler.handle_event/4,
+#   nil
+# )
 
 alias Vitals.Handler
 

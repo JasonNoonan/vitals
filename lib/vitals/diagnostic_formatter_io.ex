@@ -35,11 +35,17 @@ defmodule Vitals.DiagnosticFormatter.IO do
 
     handler_length = get_max_handler_length(handlers)
 
-    Enum.zip_with(handlers, diagnostics, fn handler, diagnostics ->
-      String.pad_trailing(handler, handler_length) <> diagnostics
+    Enum.zip_with(handlers, diagnostics, fn handler, diagnostic ->
+      String.pad_trailing(handler, handler_length) <> diagnostic
+    end)
+    |> then(fn body ->
+      headers =
+        IO.ANSI.underline() <> String.pad_trailing("Handlers", handler_length) <> String.pad_trailing("Status", 20) <> IO.ANSI.reset()
+
+      [headers | body]
     end)
     |> Enum.join("\n")
-    |> then(fn handler_status -> handler_status <> "\n" end)
+    |> then(fn handler_status -> handler_status <> "\n\n" end)
     |> IO.write()
   end
 
@@ -50,7 +56,6 @@ defmodule Vitals.DiagnosticFormatter.IO do
 
   defp to_table(diagnostics) do
     diagnostics
-    |> dbg()
     |> Enum.sort_by(fn {handler, _diagnostic} -> handler end)
     |> Enum.map(fn
       {handler, nil} ->
