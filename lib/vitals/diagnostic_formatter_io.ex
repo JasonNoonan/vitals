@@ -40,7 +40,9 @@ defmodule Vitals.DiagnosticFormatter.IO do
     end)
     |> then(fn body ->
       headers =
-        IO.ANSI.underline() <> String.pad_trailing("Handlers", handler_length) <> String.pad_trailing("Status", 20) <> IO.ANSI.reset()
+        IO.ANSI.underline() <>
+          String.pad_trailing("Handlers", handler_length) <>
+          String.pad_trailing("Status", 20) <> IO.ANSI.reset()
 
       [headers | body]
     end)

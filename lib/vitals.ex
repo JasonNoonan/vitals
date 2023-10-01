@@ -1,5 +1,4 @@
 defmodule Vitals do
-
   @spec check_diagnostics() :: String.t()
   def check_diagnostics() do
     Vitals.DiagnosticTable.check_diagnostics(:pretty)

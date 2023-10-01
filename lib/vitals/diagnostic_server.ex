@@ -21,7 +21,12 @@ defmodule Vitals.DiagnosticServer do
   end
 
   @impl GenServer
-  def init(%Handler.Spec{id: id, mod: mod} = spec) do
+  def init(%Handler.Spec{} = spec) do
+    {:ok, %{spec: spec, last_diagnostic: nil}, {:continue, :ok}}
+  end
+
+  @impl GenServer
+  def handle_continue(:ok, %{spec: %{id: id, mod: mod} = spec} = state) do
     diagnostic =
       :telemetry.span(
         [:vitals, :diagnostic],
@@ -36,7 +41,7 @@ defmodule Vitals.DiagnosticServer do
         end
       )
 
-    {:ok, %{spec: spec, last_diagnostic: diagnostic}}
+    {:noreply, %{state | last_diagnostic: diagnostic}}
   end
 
   @impl GenServer

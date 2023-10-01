@@ -9,6 +9,7 @@ defmodule Vitals.ControlledHandler do
 
   def init(%{id: id}) do
     {:ok, pid} = Agent.start_link(fn -> :healthy end, name: String.to_atom(id))
+
     Diagnostic.new(status: :healthy, timer: %{every: {5, :second}})
     |> Diagnostic.assign(agent: pid)
   end
