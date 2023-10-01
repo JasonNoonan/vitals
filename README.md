@@ -1,6 +1,5 @@
 # Vitals
 
-
 ## Plan
 
 ```elixir
@@ -26,12 +25,11 @@
 
 ```elixir
 # getting diagnostics in router
-Vitals.check_diagnostics(:http) # :http | :exit | :io | :pretty
+Vitals.check_diagnostics(:http) # :http | :exit_code | :io | :pretty
 
 # getting diagnostics in iex
-Vitals.check_diagnostics(:pretty) # :http | :exit | :io | :pretty
+Vitals.check_diagnostics(:pretty) # :http | :exit_code | :io | :pretty
 ```
-
 
 ```yaml
 # getting diagnostics in kubernetes command
@@ -42,7 +40,7 @@ spec:
         command:
           - /app/bin/my-app
           - eval
-          - "Vitals.check_diagnostics(:exit)"
+          - "Vitals.check_diagnostics(:exit_code)"
 ```
 
 ```elixir
@@ -63,7 +61,6 @@ defmodule MyApp.Vitals.Handler do
 end
 ```
 
-
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `vitals` to your list of dependencies in `mix.exs`:
 
@@ -78,4 +75,3 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/vitals>.
-
