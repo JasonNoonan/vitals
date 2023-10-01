@@ -2,7 +2,7 @@ defmodule Vitals.DiagnosticFormatter do
   @moduledoc """
   Formatter for `Vitals.DiagnosticTable.State`.
   """
-  
+
   alias Vitals.DiagnosticFormatter
   alias Vitals.DiagnosticTable.State
 

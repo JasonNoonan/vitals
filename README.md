@@ -8,12 +8,20 @@
 {
   Vitals.Supervisor,
   handlers: [
-    StripeHandler,
-    SalesforceHandler,
-    EctoHandler
+    Vitals.Handler.spec(
+      id: "ecto"
+      mod: EctoHandler,
+    ),
+    Vitals.Handler.spec(
+      id: "ecto-readonly"
+      mod: EctoHandler,
+    ),
+    Vitals.Handler.spec(
+      id: "stripe",
+      mod: StripeHandler,
+    )
   ]
 }
-
 ```
 
 ```elixir

@@ -31,6 +31,7 @@ defmodule Vitals.DiagnosticFormatter.IO do
 
         [[to_string(handler) | handlers], [diag | diagnostics]]
       end)
+      |> Enum.map(&Enum.reverse/1)
 
     handler_length = get_max_handler_length(handlers)
 
@@ -49,6 +50,8 @@ defmodule Vitals.DiagnosticFormatter.IO do
 
   defp to_table(diagnostics) do
     diagnostics
+    |> dbg()
+    |> Enum.sort_by(fn {handler, _diagnostic} -> handler end)
     |> Enum.map(fn
       {handler, nil} ->
         [handler, :initializing]

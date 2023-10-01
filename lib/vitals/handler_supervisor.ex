@@ -11,12 +11,8 @@ defmodule Vitals.HandlerSupervisor do
 
   def init(handlers) do
     handlers
-    |> Enum.map(fn
-      {h, args} ->
-        {Vitals.DiagnosticServer, Keyword.put(args, :handler, h)}
-
-      h ->
-        {Vitals.DiagnosticServer, [handler: h]}
+    |> Enum.map(fn handler_spec ->
+      {Vitals.DiagnosticServer, handler_spec}
     end)
     |> Supervisor.init(strategy: :one_for_one)
   end

@@ -31,7 +31,7 @@ defmodule Vitals.Diagnostic do
   to schedule the next check.
   """
   @type timer_spec :: %{
-    every: {non_neg_integer(), :second | :millisecond}
+          every: {non_neg_integer(), :second | :millisecond}
         }
 
   @type t :: %__MODULE__{
@@ -56,6 +56,20 @@ defmodule Vitals.Diagnostic do
       |> Map.put_new(:assigns, %{})
 
     struct!(__MODULE__, params_with_defaults)
+  end
+
+  @spec assign(t(), keyword()) :: t()
+  @doc """
+  Add new `assigns` to `diagnostic`.
+  """
+  def assign(%__MODULE__{assigns: current_assigns} = diagnostic, assigns) do
+    assigns = Map.new(assigns)
+    updated_assigns = Map.merge(current_assigns, assigns)
+
+    %__MODULE__{
+      diagnostic
+      | assigns: updated_assigns
+    }
   end
 
   @spec timer?(t()) :: boolean()

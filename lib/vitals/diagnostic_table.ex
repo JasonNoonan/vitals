@@ -1,6 +1,7 @@
 defmodule Vitals.DiagnosticTable do
   alias Vitals.Diagnostic
   alias Vitals.DiagnosticFormatter
+  alias Vitals.Handler
 
   defmodule State do
     @moduledoc """
@@ -64,18 +65,13 @@ defmodule Vitals.DiagnosticTable do
   end
 
   @impl GenServer
-  def init(handlers) do
+  def init(handler_specs) do
     :ets.new(@table, [:named_table, :public, read_concurrency: true])
 
-    # initialize all handlers against table
-    # TODO: handle {handler, opts} form
-    Enum.each(handlers, fn 
-      {_handler, opts} ->
-        :ets.insert(@table, {opts[:id], nil})
+    initial_handler_diagnostics =
+      Enum.map(handler_specs, fn %Handler.Spec{id: id} -> {id, nil} end)
 
-      handler ->
-        :ets.insert(@table, {handler, nil})
-    end)
+    :ets.insert(@table, initial_handler_diagnostics)
 
     {:ok, nil}
   end

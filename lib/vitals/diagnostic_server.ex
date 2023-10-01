@@ -5,46 +5,42 @@ defmodule Vitals.DiagnosticServer do
 
   use GenServer
   alias Vitals.Diagnostic
+  alias Vitals.Handler
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts)
   end
 
-  def child_spec(args) do
-    id = Keyword.get(args, :id, __MODULE__)
-
+  def child_spec(%Handler.Spec{id: id} = spec) do
     default = %{
       id: id,
-      start: {__MODULE__, :start_link, [args]}
+      start: {__MODULE__, :start_link, [spec]}
     }
 
     Supervisor.child_spec(default, [])
   end
 
   @impl GenServer
-  def init(opts) do
-    handler = opts[:handler]
-    id = Keyword.get(opts, :id, handler)
-
+  def init(%Handler.Spec{id: id, mod: mod} = spec) do
     diagnostic =
       :telemetry.span(
         [:vitals, :diagnostic],
         %{},
         fn ->
           diagnostic =
-            handler.init(opts)
-            |> report_diagnostic(handler)
+            mod.init(spec)
+            |> report_diagnostic(id)
             |> maybe_schedule_follow_up()
 
           {diagnostic, %{handler: id, diagnostic: diagnostic}}
         end
       )
 
-    {:ok, %{handler: handler, id: id, last_diagnostic: diagnostic}}
+    {:ok, %{spec: spec, last_diagnostic: diagnostic}}
   end
 
   @impl GenServer
-  def handle_info(:check, %{handler: handler, id: id, last_diagnostic: last_diagnostic} = state) do
+  def handle_info(:check, %{spec: %{id: id, mod: mod}, last_diagnostic: last_diagnostic} = state) do
     new_diagnostic =
       :telemetry.span(
         [:vitals, :diagnostic],
@@ -52,11 +48,11 @@ defmodule Vitals.DiagnosticServer do
         fn ->
           diagnostic =
             last_diagnostic
-            |> handler.check()
+            |> mod.check()
             |> report_diagnostic(id)
             |> maybe_schedule_follow_up()
 
-          {diagnostic, %{handler: handler, diagnostic: diagnostic}}
+          {diagnostic, %{handler: id, diagnostic: diagnostic}}
         end
       )
 
