@@ -11,18 +11,21 @@ defmodule Vitals.DiagnosticServer do
     GenServer.start_link(__MODULE__, opts)
   end
 
-  def child_spec(%Handler.Spec{id: id} = spec) do
+  def child_spec(opts) do
+    %Handler.Spec{id: id} = opts[:handler_spec]
+
     default = %{
       id: id,
-      start: {__MODULE__, :start_link, [spec]}
+      start: {__MODULE__, :start_link, [opts]}
     }
 
     Supervisor.child_spec(default, [])
   end
 
   @impl GenServer
-  def init(%Handler.Spec{} = spec) do
-    {:ok, %{spec: spec, last_diagnostic: nil}, {:continue, :ok}}
+  def init(opts) do
+    %Handler.Spec{} = spec = opts[:handler_spec]
+    {:ok, %{name: opts[:name], spec: spec, last_diagnostic: nil}, {:continue, :ok}}
   end
 
   @impl GenServer
@@ -34,7 +37,7 @@ defmodule Vitals.DiagnosticServer do
         fn ->
           diagnostic =
             mod.init(spec)
-            |> report_diagnostic(id)
+            |> report_diagnostic(state)
             |> maybe_schedule_follow_up()
 
           {diagnostic, %{handler: id, diagnostic: diagnostic}}
@@ -54,7 +57,7 @@ defmodule Vitals.DiagnosticServer do
           diagnostic =
             last_diagnostic
             |> mod.check()
-            |> report_diagnostic(id)
+            |> report_diagnostic(state)
             |> maybe_schedule_follow_up()
 
           {diagnostic, %{handler: id, diagnostic: diagnostic}}
@@ -68,8 +71,11 @@ defmodule Vitals.DiagnosticServer do
   # HELPERS
   #################################################
 
-  defp report_diagnostic(diagnostic, handler_id) do
-    Vitals.DiagnosticTable.add_diagnostic(handler_id, diagnostic)
+  defp report_diagnostic(diagnostic, handler_state) do
+    Vitals.DiagnosticTable.add_diagnostic(handler_state.spec.id, diagnostic,
+      name: handler_state.name
+    )
+
     diagnostic
   end
 

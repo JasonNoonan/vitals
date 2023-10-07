@@ -22,25 +22,28 @@ defmodule Vitals.DiagnosticTable do
   end
 
   use GenServer
-  @table __MODULE__
+  @type call_opts :: keyword()
 
-  def start_link(handlers) do
-    GenServer.start_link(__MODULE__, handlers, name: __MODULE__)
+  def start_link(opts) do
+    opts = Keyword.put_new(opts, :name, Vitals)
+    GenServer.start_link(__MODULE__, opts, name: Module.concat(opts[:name], DiagnosticTable))
   end
 
-  @spec add_diagnostic(handler :: module(), Diagnostic.t()) :: true
+  @spec add_diagnostic(handler :: module(), Diagnostic.t(), call_opts()) :: true
   @doc """
   Add `diagnostic` result for `handler` to DiagnosticTable.
   """
-  def add_diagnostic(handler, diagnostic) do
-    :ets.insert(@table, {handler, diagnostic})
+  def add_diagnostic(handler, diagnostic, opts \\ []) do
+    :ets.insert(table_name(opts), {handler, diagnostic})
   end
 
+  @spec check_diagnostics(format :: Vitals.Formatter.format(), call_opts()) ::
+          String.t() | integer()
   @doc """
   Output current diagnostic state in `format`.
   """
-  def check_diagnostics(format) do
-    handler_diagnostics = :ets.tab2list(@table)
+  def check_diagnostics(format, opts \\ []) do
+    handler_diagnostics = :ets.tab2list(table_name(opts))
 
     status =
       Enum.reduce_while(handler_diagnostics, :healthy, fn
@@ -65,14 +68,19 @@ defmodule Vitals.DiagnosticTable do
   end
 
   @impl GenServer
-  def init(handler_specs) do
-    :ets.new(@table, [:named_table, :public, read_concurrency: true])
+  def init(opts) do
+    :ets.new(table_name(opts), [:named_table, :public, read_concurrency: true])
 
     initial_handler_diagnostics =
-      Enum.map(handler_specs, fn %Handler.Spec{id: id} -> {id, nil} end)
+      Enum.map(opts[:handlers], fn %Handler.Spec{id: id} -> {id, nil} end)
 
-    :ets.insert(@table, initial_handler_diagnostics)
+    :ets.insert(table_name(opts), initial_handler_diagnostics)
 
     {:ok, nil}
+  end
+
+  defp table_name(opts) do
+    prefix = Keyword.get(opts, :name, Vitals)
+    Module.concat(prefix, DiagnosticTable)
   end
 end

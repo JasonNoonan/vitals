@@ -7,8 +7,6 @@ defmodule Vitals.DummyHandler do
   end
 
   def init(spec) do
-    dbg(spec.id)
-
     status =
       if spec.id == "handler1" do
         :degraded

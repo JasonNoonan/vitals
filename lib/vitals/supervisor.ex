@@ -4,6 +4,7 @@ defmodule Vitals.Supervisor do
   # in application.ex or root supervisor
   {
     Vitals.Supervisor,
+    name: MyVitals,
     handlers: [
       Vitals.Handler.spec(
         id: "ecto"
@@ -24,8 +25,10 @@ defmodule Vitals.Supervisor do
   use Supervisor
 
   def start_link(opts) do
+    opts = Keyword.put_new(opts, :name, Vitals)
+
     if handlers_valid?(opts[:handlers]) do
-      Supervisor.start_link(__MODULE__, opts, name: __MODULE__)
+      Supervisor.start_link(__MODULE__, opts, name: Module.concat(opts[:name], Supervisor))
     else
       raise ArgumentError, "Each Vitals.Handler.Spec must have unique id"
     end
@@ -35,8 +38,8 @@ defmodule Vitals.Supervisor do
     handlers = opts[:handlers]
 
     children = [
-      {Vitals.DiagnosticTable, handlers},
-      {Vitals.HandlerSupervisor, handlers}
+      {Vitals.DiagnosticTable, handlers: handlers, name: opts[:name]},
+      {Vitals.HandlerSupervisor, handlers: handlers, name: opts[:name]}
     ]
 
     Supervisor.init(children, strategy: :one_for_all)
